@@ -1,11 +1,7 @@
-import networkx as nx
 import numpy as np
-import matplotlib.pyplot as plt
-import graf as gr
-import uzel as uz
-import mcts
+from src import graf as gr, mcts
 from anytree.exporter import DotExporter
-from anytree import Node, RenderTree, AsciiStyle
+from anytree import Node
 
 adjacency = np.array([[0, 2, 4, 1, 5],
                       [2, 0, 3, 4, 3],
