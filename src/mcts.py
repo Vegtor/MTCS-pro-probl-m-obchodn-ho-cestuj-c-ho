@@ -80,8 +80,8 @@ class MCTS:
             self.celkovy_pocet += 1
             v0 = self.pravidla_stromu(self.koren)
             vl = self.obecne_pravidlo(v0)
-            print("Pred Backup")
-            self.vykresleni()
+            #print("Pred Backup")
+            #self.vykresleni()
             self.backup(v0, vl)
-            print("Po Backup")
-            self.vykresleni()
+            #print("Po Backup")
+            #self.vykresleni()
