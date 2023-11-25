@@ -1,5 +1,5 @@
 import random
-import uzel as uz
+from src import uzel as uz
 from src import graf as gr
 from anytree import RenderTree
 import numpy as np

@@ -1,7 +1,7 @@
 import numpy as np
 from src import graf as gr, mcts
+from src import uzel as uz
 from anytree.exporter import DotExporter
-from anytree import Node
 
 adjacency = np.array([[0, 2, 4, 1, 5],
                       [2, 0, 3, 4, 3],
@@ -17,10 +17,11 @@ A.alg(500)
 s = 5
 
 
-def nodenamefunc(node: Node):
+def nodenamefunc(vrchol):
     temp = (
-        '<FONT POINT-SIZE ="12"> {node.name}</FONT><BR/> <FONT POINT-SIZE="8">v = { }</FONT> <BR/> <FONT POINT-SIZE="8">v = { }</FONT>')
+        '<FONT POINT-SIZE ="12"> {vrchol.name}</FONT><BR/> <FONT POINT-SIZE="8">v = {vrchol.uzel.prum_uzel}</FONT> <BR/> <FONT POINT-SIZE="8">v = {vrchol.uzel.n}</FONT>')
     return temp
 
-for line in DotExporter(A.koren, graph="tree", nodenamefunc=nodenamefunc, nodeattrfunc=lambda node: "shape=box"):
+
+for line in DotExporter(A.koren.vrchol_vykresleni, graph="graph", nodenamefunc=nodenamefunc):
     print(line)

@@ -2,10 +2,22 @@ import copy
 import math
 import string
 
-from anytree import Node
+from anytree import NodeMixin, Node
+
+
+class Uzel_vykresleni(NodeMixin):
+    def __init__(self, name, uzel, parent=None, children=None):
+        super(Uzel_vykresleni, self).__init__()
+        self.name = name
+        self.uzel = uzel
+        self.parent = parent
+        if children:
+            self.children = children
+
 
 class Uzel:
-    def __init__(self, predek: 'Uzel', potomci: list['Uzel'], oznaceni: int, nezarazene: list[int], cesta: 'Uzel', nazev_vykresleni: string, predek_vykresleni: Node):
+    def __init__(self, predek: 'Uzel', potomci: list['Uzel'], oznaceni: int, nezarazene: list[int], cesta: 'Uzel',
+                 nazev_vykresleni: string, predek_vykresleni: Node):
         self.prum_uzel = 0
         self.n = 0
         self.predek = predek
@@ -16,7 +28,7 @@ class Uzel:
         self.nezarazene = nezarazene
         self.cesta = cesta
         self.celkova_cena = 0
-        self.vrchol_vykresleni = Node(nazev_vykresleni, parent=predek_vykresleni)
+        self.vrchol_vykresleni = Uzel_vykresleni(nazev_vykresleni, self, parent=predek_vykresleni)
         self.mozne_cesty = nezarazene.copy()
 
     def uct_skore(self, celkovy_pocet: int, vaha_c: float):
@@ -24,10 +36,10 @@ class Uzel:
 
     def nej_uct_potomek(self):
         index = 0
-        for i in range(0,len(self.potomci)):
+        for i in range(0, len(self.potomci)):
             if self.potomci[i].uct < self.potomci[index].uct:
                 index = i
         return self.potomci[index]
 
     def prepocitat_prumer(self):
-        self.prum_uzel = self.celkova_cena/self.n
+        self.prum_uzel = self.celkova_cena / self.n
