@@ -1,25 +1,34 @@
 import numpy as np
 from src import graf as gr, mcts
-from src import uzel as uz
 from anytree.exporter import DotExporter
-from graphviz import Source, render
+from graphviz import Source
+import networkx as nx
+import matplotlib.pyplot as plt
 
-adjacency = np.array([[0, 2, 4, 1],
-                      [2, 0, 3, 4],
-                      [4, 3, 0, 1],
-                      [1, 4, 1, 0],])
+adjacency = np.array([[0, 2, 1, 8, 5],
+                      [2, 0, 3, 4, 7],
+                      [1, 3, 0, 1, 3],
+                      [8, 4, 1, 0, 2],
+                      [5, 7, 3, 2, 0], ])
+
+
+G = nx.from_numpy_array(np.array(adjacency))
+
+pos = nx.spring_layout(G)
+nx.draw(G, pos)
+labels = nx.get_edge_attributes(G, 'weight')
+nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+plt.show()
 
 g = gr.Graf(adjacency)
-a = 5
-
 A = mcts.MCTS(g)
 A.alg(500)
-s = 5
 
 
 def nodeattr(vrchol):
     temp = (
-            'label = <<FONT POINT-SIZE ="12"> ' + str(vrchol.name) + '</FONT><BR/> <FONT POINT-SIZE="8">v = ' + str(vrchol.uzel.prum_uzel) + '</FONT> <BR/> <FONT POINT-SIZE="8">n = ' + str(vrchol.uzel.n) + '</FONT>>')
+            'label = <<FONT POINT-SIZE ="12"> ' + str(vrchol.name) + '</FONT><BR/> <FONT POINT-SIZE="8">v = ' + str(
+        vrchol.uzel.prum_uzel) + '</FONT> <BR/> <FONT POINT-SIZE="8">n = ' + str(round(vrchol.uzel.n, 2)) + '</FONT>>')
     return temp
 
 

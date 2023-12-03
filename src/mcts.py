@@ -2,7 +2,7 @@ import random
 from src import uzel as uz
 from src import graf as gr
 from anytree import RenderTree
-import numpy as np
+import networkx as nx
 
 
 class MCTS:
@@ -10,7 +10,7 @@ class MCTS:
         self.koren = uz.Uzel(None, [], 0, list(range(1, graf.pocet_uzlu)), None, "0", None)
         self.graf = graf
         self.celkovy_pocet = 0
-        self.C = np.sqrt(2)
+        self.C = nx.minimum_spanning_tree(self.graf.graf).size(weight="weight")
 
     @staticmethod
     def vrchol_list(vrchol: uz.Uzel):
@@ -29,9 +29,14 @@ class MCTS:
         vrchol.potomci[-1].n = 1
         return vrchol.potomci[-1]
 
+    def prepocitat_uct(self, potomci: list[uz.Uzel]):
+        for i in range(0, len(potomci)):
+            potomci[i].uct_skore(self.celkovy_pocet, self.C)
+
     def pravidla_stromu(self, vrchol: uz.Uzel):
         while not self.vrchol_list(vrchol):
             if (vrchol.nezarazene is None) or (len(vrchol.nezarazene) == 0):
+                self.prepocitat_uct(vrchol.potomci)
                 temp = vrchol.nej_uct_potomek()
                 temp.akum_cesta += self.graf.matice_vah[vrchol.oznaceni][temp.oznaceni]
                 temp.n += 1
@@ -69,6 +74,7 @@ class MCTS:
             v0.prepocitat_prumer()
             v0.uct_skore(self.celkovy_pocet, self.C)
             v0.predek.akum_cesta = v0.akum_cesta
+            v0.akum_cesta = 0
             v0 = v0.predek
 
     def vykresleni(self):
