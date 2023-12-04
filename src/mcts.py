@@ -8,19 +8,22 @@ import networkx as nx
 class MCTS:
     def __init__(self, graf: gr.Graf):
         self.koren = uz.Uzel(None, [], 0, list(range(1, graf.pocet_uzlu)), None, "0", None)
-        self.graf = graf
+        self.graf = graf  # uložení instance třídy nadstavby NetworkX
         self.celkovy_pocet = 0
-        self.C = nx.minimum_spanning_tree(self.graf.graf).size(weight="weight")
+        self.C = nx.minimum_spanning_tree(self.graf.graf).size(
+            weight="weight")  # Konstanta - hodnota minimální kostry grafu
 
     @staticmethod
     def vrchol_list(vrchol: uz.Uzel):
+        # statická metoda pro ověření, zda už jsem v listové vrstvě (v rámci MCTS konec hry)
         if (vrchol.potomci == []) and ((vrchol.nezarazene is None) or (len(vrchol.nezarazene) == 0)):
             return True
         else:
             return False
 
     def rozsireni_stromu(self, vrchol: uz.Uzel):
-        temp: int = vrchol.nezarazene.pop()
+        # přidání vrcholu do stromu, vrací referenci na námi nově vytvořený vrchol
+        temp = vrchol.nezarazene.pop()
         temp_mozne_cesty = vrchol.mozne_cesty.copy()
         temp_mozne_cesty.remove(temp)
         vrchol.potomci.append(
@@ -30,15 +33,20 @@ class MCTS:
         return vrchol.potomci[-1]
 
     def prepocitat_uct(self, potomci: list[uz.Uzel]):
+        # přepočítání UCT skóré pro všechny vrcholy ve stromu, spouští se po každé iteraci
         for i in range(0, len(potomci)):
             potomci[i].uct_skore(self.celkovy_pocet, self.C)
 
     def pravidla_stromu(self, vrchol: uz.Uzel):
+        # rozšiřování stromu se děje vždy po jednom vrcholu, tato funkce buďto vytvoří vrchol ze seznamu nezařazených
+        # nebo provede výběr vrcholu stromu, ze kterého se tvoří cesta (v rámci obecného MCTS se jedná vrchol,
+        # ze které se odehrává simulace dalších tahů hry)
         while not self.vrchol_list(vrchol):
             if (vrchol.nezarazene is None) or (len(vrchol.nezarazene) == 0):
                 self.prepocitat_uct(vrchol.potomci)
                 temp = vrchol.nej_uct_potomek()
                 temp.akum_cesta += self.graf.matice_vah[vrchol.oznaceni][temp.oznaceni]
+                # přičtení hodnoty cesty z předka do tohoto uzlu, aby při simulaci jsem měli již velikost cesty skrz strom
                 temp.n += 1
                 vrchol = temp
             else:
@@ -46,11 +54,13 @@ class MCTS:
         return vrchol
 
     def obecne_pravidlo(self, vrchol: uz.Uzel):
+        # funkce ze které probíhá simulace cesty, ta se vybírá náhodně z rovnoměrného rozdělení
         while not self.vrchol_list(vrchol):
             if len(vrchol.nezarazene) != 1:
                 rand_index = random.randrange(0, len(vrchol.nezarazene) - 1)
             else:
                 rand_index = 0
+            # přidáná podmínka jelikož randrange funkce není definováná pro pouze jedno číslo
             temp_index = vrchol.nezarazene[rand_index]
             temp_nezarazene = vrchol.nezarazene.copy()
             temp_nezarazene.remove(temp_index)
@@ -60,34 +70,36 @@ class MCTS:
         return vrchol
 
     def backup(self, v0: uz.Uzel, vl: uz.Uzel):
+        # funckce pro zpětný průchod stromem a přepočítání jednotlivých vlastností vrcholů
         v0.akum_cesta += self.graf.matice_vah[vl.oznaceni][0]
+        while vl != v0:
+            # procházení simulace a výpočet cesty která byla náhodně vybrána
+            v0.akum_cesta += self.graf.matice_vah[v0.oznaceni][vl.oznaceni]
+            if str(vl.vrchol_vykresleni.name).__contains__("n"):
+                vl.vrchol_vykresleni.parent = None
+            vl = vl.predek
+            vl.cesta = []
         while v0.predek is not None:
-            while vl != v0:
-                v0.akum_cesta += self.graf.matice_vah[v0.oznaceni][vl.oznaceni]
-                if str(vl.vrchol_vykresleni.name).__contains__("n"):
-                    vl.vrchol_vykresleni.parent = None
-                vl = vl.predek
-                vl.cesta = []
+            # procházení stromu kde se přepočítávají hodnoty na základě simulace
             v0.cesta = []
             v0.vrchol_vykresleni.parent = v0.predek.vrchol_vykresleni
             v0.celkova_cena += v0.akum_cesta
             v0.prepocitat_prumer()
-            v0.uct_skore(self.celkovy_pocet, self.C)
             v0.predek.akum_cesta = v0.akum_cesta
             v0.akum_cesta = 0
             v0 = v0.predek
 
-    def vykresleni(self):
-        for pre, fill, node in RenderTree(self.koren.vrchol_vykresleni):
-            print("%s%s" % (pre, node.name))
+############ Pomocná funkce pro vykreslení stromu do konzole ################
+#    def vykresleni(self):
+#        for pre, fill, node in RenderTree(self.koren.vrchol_vykresleni):
+#            print("%s%s" % (pre, node.name))
+#############################################################################
 
     def alg(self, pocet_iteraci: int):
+        # samotný algoritmus, omezený na počet kroků
         for i in range(0, pocet_iteraci):
             self.celkovy_pocet += 1
             v0 = self.pravidla_stromu(self.koren)
             vl = self.obecne_pravidlo(v0)
-            #print("Pred Backup")
-            #self.vykresleni()
             self.backup(v0, vl)
-            #print("Po Backup")
-            #self.vykresleni()
+
