@@ -7,11 +7,12 @@ import networkx as nx
 
 class MCTS:
     def __init__(self, graf: gr.Graf):
-        self.koren = uz.Uzel(None, [], 0, list(range(1, graf.pocet_uzlu)), None, "0", None)
+        self.koren = uz.Uzel(None, [], 0, list(range(1, graf.pocet_uzlu)),
+                             None, "0", None)
         self.graf = graf  # uložení instance třídy nadstavby NetworkX
         self.celkovy_pocet = 0
-        self.C = nx.minimum_spanning_tree(self.graf.graf).size(
-            weight="weight")  # Konstanta - hodnota minimální kostry grafu
+        self.C = nx.minimum_spanning_tree(self.graf.graf).size(weight="weight")
+        # Konstanta - hodnota minimální kostry grafu
 
     @staticmethod
     def vrchol_list(vrchol: uz.Uzel):
@@ -64,8 +65,10 @@ class MCTS:
             temp_index = vrchol.nezarazene[rand_index]
             temp_nezarazene = vrchol.nezarazene.copy()
             temp_nezarazene.remove(temp_index)
-            vrchol.cesta = uz.Uzel(vrchol, [], temp_index, temp_nezarazene.copy(), None,
-                                   str(temp_index) + "n", vrchol.vrchol_vykresleni)
+            vrchol.cesta = uz.Uzel(vrchol, [], temp_index,
+                                   temp_nezarazene.copy(), None,
+                                   str(temp_index) + "n",
+                                   vrchol.vrchol_vykresleni)
             vrchol = vrchol.cesta
         return vrchol
 

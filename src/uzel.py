@@ -19,7 +19,8 @@ class Uzel_vykresleni(NodeMixin):
 
 class Uzel:
     # třída pro vrchol stromu
-    def __init__(self, predek: 'Uzel', potomci: list['Uzel'], oznaceni: int, nezarazene: list[int], cesta: 'Uzel',
+    def __init__(self, predek: 'Uzel', potomci: list['Uzel'],
+                 oznaceni: int, nezarazene: list[int], cesta: 'Uzel',
                  nazev_vykresleni: string, predek_vykresleni: Node):
         self.prum_uzel = 0
         # průměrná cena celé cesty (celého okruho z počátku a zpátky)
@@ -36,15 +37,20 @@ class Uzel:
         self.akum_cesta = 0
         # akumulace cesty v jedné iteraci, respektive její cena
         self.nezarazene = nezarazene
-        # používané při simulaci, list vrcholů, které může simulace "vygenerovat" (náhodně vybrat a vytvořit)
+        # používané při simulaci, list vrcholů,
+        # které může simulace "vygenerovat" (náhodně vybrat a vytvořit)
         self.cesta = cesta
         # atribut, do které ukládáme kroky simulace
         self.celkova_cena = 0
-        # nasčítáná cesta přes všechny iterace, ve kterých se daný uzel nacházel, pro výpočet průměru
-        self.vrchol_vykresleni = Uzel_vykresleni(nazev_vykresleni, self, parent=predek_vykresleni)
+        # nasčítáná cesta přes všechny iterace,
+        # ve kterých se daný uzel nacházel, pro výpočet průměru
+        self.vrchol_vykresleni = Uzel_vykresleni(nazev_vykresleni, self,
+                                                 parent=predek_vykresleni)
         # atribut pro vykreslení
         self.mozne_cesty = nezarazene.copy()
-        # list všech vrcholů ze stavového prostoru (vrcholy které jsem ještě neprošli a nejsou potomkem/předkem daného uzlu)
+        # list všech vrcholů ze stavového prostoru (vrcholy,
+        # které jsem ještě neprošli
+        # a nejsou potomkem/předkem daného uzlu)
 
     def uct_skore(self, celkovy_pocet: int, vaha_c: float):
         # výpočet UCT skóre
