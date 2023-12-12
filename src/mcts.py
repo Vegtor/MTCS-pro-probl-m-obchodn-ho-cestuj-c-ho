@@ -1,7 +1,8 @@
 import random
 from src import uzel as uz
 from src import graf as gr
-from anytree import RenderTree
+#from anytree import RenderTree
+from anytree.exporter import DotExporter
 import networkx as nx
 
 
@@ -92,11 +93,21 @@ class MCTS:
             v0.akum_cesta = 0
             v0 = v0.predek
 
-############ Pomocná funkce pro vykreslení stromu do konzole ################
-#    def vykresleni(self):
-#        for pre, fill, node in RenderTree(self.koren.vrchol_vykresleni):
-#            print("%s%s" % (pre, node.name))
-#############################################################################
+    ############ Pomocná funkce pro vykreslení stromu do konzole ################
+    #    def vykresleni(self):
+    #        for pre, fill, node in RenderTree(self.koren.vrchol_vykresleni):
+    #            print("%s%s" % (pre, node.name))
+    #############################################################################
+
+    def generovat_dot(self):
+        def nodeattr(vrchol):
+            temp = 'label = <<FONT POINT-SIZE ="18"> ' + str(
+                vrchol.name) + '</FONT><BR/> <FONT POINT-SIZE="16">v = ' + str(
+                vrchol.uzel.prum_uzel) + '</FONT> <BR/> <FONT POINT-SIZE="16">n = ' + str(
+                round(vrchol.uzel.n, 2)) + '</FONT>>'
+            return temp
+        DotExporter(self.koren.vrchol_vykresleni, nodeattrfunc=nodeattr).to_dotfile("udo.dot")
+
 
     def alg(self, pocet_iteraci: int):
         # samotný algoritmus, omezený na počet kroků
@@ -106,3 +117,14 @@ class MCTS:
             vl = self.obecne_pravidlo(v0)
             self.backup(v0, vl)
 
+    def cesta(self):
+        cela_cesta = "0"
+        vrchol = self.koren
+        while len(vrchol.potomci) != 0:
+            temp = vrchol.potomci[0]
+            for i in range(0, len(vrchol.potomci)):
+                if temp.prum_uzel > vrchol.potomci[i].prum_uzel:
+                    temp = vrchol.potomci[i]
+            cela_cesta = cela_cesta + str(temp.oznaceni)
+            vrchol = temp
+        return cela_cesta + "0"
