@@ -1,4 +1,7 @@
 import random
+import string
+import os
+
 from src import uzel as uz
 from src import graf as gr
 #from anytree import RenderTree
@@ -14,6 +17,8 @@ class MCTS:
         self.celkovy_pocet = 0
         self.C = nx.minimum_spanning_tree(self.graf.graf).size(weight="weight")
         # Konstanta - hodnota minimální kostry grafu
+        #self.pocet_obr = 0
+
 
     @staticmethod
     def vrchol_list(vrchol: uz.Uzel):
@@ -99,15 +104,38 @@ class MCTS:
     #            print("%s%s" % (pre, node.name))
     #############################################################################
 
-    def generovat_dot(self):
+    def generovat_dot(self, nazev: string):
         def nodeattr(vrchol):
             temp = 'label = <<FONT POINT-SIZE ="18"> ' + str(
-                vrchol.name) + '</FONT><BR/> <FONT POINT-SIZE="16">v = ' + str(
-                vrchol.uzel.prum_uzel) + '</FONT> <BR/> <FONT POINT-SIZE="16">n = ' + str(
-                round(vrchol.uzel.n, 2)) + '</FONT>>'
+                vrchol.uzel.vrchol_vykresleni.name) + '</FONT><BR/> <FONT POINT-SIZE="16">v = ' + str(
+                round(vrchol.uzel.prum_uzel, 2)) + '</FONT> <BR/> <FONT POINT-SIZE="16">n = ' + str(
+                vrchol.uzel.n) + '</FONT>>'
+            if vrchol.uzel.vrchol_vykresleni.name.__contains__("n"):
+                temp += " shape=diamond"
             return temp
-        DotExporter(self.koren.vrchol_vykresleni, nodeattrfunc=nodeattr).to_dotfile("udo.dot")
+        DotExporter(self.koren.vrchol_vykresleni, nodeattrfunc=nodeattr).to_dotfile(nazev+".dot")
 
+    def generovat_dot_2(self, nazev: string):
+        def nodeattr(vrchol):
+            if vrchol == self.koren:
+                temp = 'label = <<FONT POINT-SIZE ="18"> ' + str(
+                    vrchol.uzel.vrchol_vykresleni.name) + '</FONT>>'
+            elif vrchol.uzel.vrchol_vykresleni.name.__contains__("n"):
+                temp = temp = 'label = <<FONT POINT-SIZE ="18"> ' + str(
+                vrchol.uzel.vrchol_vykresleni.name) + '</FONT>>'
+                temp += " shape=diamond"
+            else:
+                temp = 'label = <<FONT POINT-SIZE ="18"> ' + str(
+                vrchol.uzel.vrchol_vykresleni.name) + '</FONT><BR/> <FONT POINT-SIZE="16">v = ' + str(
+                round(vrchol.uzel.prum_uzel, 2)) + '</FONT> <BR/> <FONT POINT-SIZE="16">n = ' + str(
+                vrchol.uzel.n) + '</FONT>>'
+            return temp
+        DotExporter(self.koren.vrchol_vykresleni, nodeattrfunc=nodeattr).to_dotfile(nazev+".dot")
+
+    def generovat_png(self, nazev: string):
+        self.generovat_dot_2("temporary")
+        os.system('cmd /c dot -Tpng -o ' + nazev + '.png -Gdpi=600 temporary.dot')
+        os.remove("temporary.dot")
 
     def alg(self, pocet_iteraci: int):
         # samotný algoritmus, omezený na počet kroků
